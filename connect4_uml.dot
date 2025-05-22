@@ -1,0 +1,26 @@
+digraph Connect4Project {
+    rankdir=LR;
+    node [shape=record, fontsize=10, fontname="Helvetica"];
+
+    Connect4 [label="{Connect4| - board: ndarray\n- current_player: int\n- last_move: tuple| + clone()\n+ get_legal_actions()\n+ make_move(col)\n+ is_terminal()\n+ get_winner()\n+ get_state_tensor()}"];
+
+    MCTSNode [label="{MCTSNode| - game_state: Connect4\n- parent: MCTSNode\n- children: dict\n- visit_count: int\n- total_value: float\n- prior: float| + expanded()\n+ value()}"];
+
+    MCTS [label="{MCTS| - game_cls: type\n- nn: Connect4Net\n- num_simulations: int\n- c_puct: float| + run(root_game)\n+ _simulate(node)\n+ _select(node)\n+ _backpropagate(path, value)\n+ _mask_invalid(policy, valid_moves)}"];
+
+    Connect4Net [label="{Connect4Net| - conv layers\n- residual blocks\n- policy head\n- value head| + forward()\n+ predict()}"];
+
+    Connect4Dataset [label="{Connect4Dataset| - examples: list| + __len__()\n+ __getitem__()}"];
+
+    TrainingLoop [label="{Training Loop| - self_play()\n- train_model()\n- evaluate()\n- Elo tracking}"];
+
+    // Relationships
+    MCTSNode -> Connect4 [label="stores game state"];
+    MCTS -> MCTSNode [label="uses nodes"];
+    MCTS -> Connect4Net [label="uses NN"];
+    Connect4Dataset -> TrainingLoop [label="used by"];
+    Connect4Net -> TrainingLoop [label="used by"];
+    MCTS -> TrainingLoop [label="used by"];
+    Connect4 -> MCTSNode [label="used by"];
+}
+
