@@ -61,7 +61,8 @@ if __name__ == "__main__":
     games_per_iteration = 10
 
     for i in range(num_iterations):
-        print(f"=== Iteration {i+1}/{num_iterations} ===")
+        print(f"
+=== Iteration {i+1}/{num_iterations} ===")
         model = Connect4Net()
         latest_checkpoint = f"checkpoints/connect4_epoch{i}.pt" if i > 0 else None
         if latest_checkpoint and os.path.exists(latest_checkpoint):
@@ -74,5 +75,9 @@ if __name__ == "__main__":
 
         checkpoint_file = f"checkpoints/connect4_epoch{i+1}.pt"
         if os.path.exists(checkpoint_file):
-            evaluate_against_random(checkpoint_file, num_games=20)
+            from evaluate import evaluate_against_random
+            result = evaluate_against_random(checkpoint_file, num_games=20)
+            with open("win_rates.csv", "a") as f:
+                f.write(f"{i+1},{result['wins']},{result['losses']},{result['draws']}
+")
 
