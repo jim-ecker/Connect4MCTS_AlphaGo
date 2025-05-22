@@ -55,10 +55,24 @@ def train_model(model, dataset, batch_size=32, epochs=5, lr=1e-3, checkpoint_pat
 if __name__ == "__main__":
     from connect4 import Connect4
     from mcts import MCTS
+    from evaluate import evaluate_against_random
 
-    model = Connect4Net()
-    mcts = MCTS(Connect4, model, num_simulations=50)
-    examples = run_self_play(mcts, Connect4, num_games=10)
-    dataset = Connect4Dataset(examples)
-    train_model(model, dataset, checkpoint_path="checkpoints")
+    num_iterations = 5
+    games_per_iteration = 10
+
+    for i in range(num_iterations):
+        print(f"=== Iteration {i+1}/{num_iterations} ===")
+        model = Connect4Net()
+        latest_checkpoint = f"checkpoints/connect4_epoch{i}.pt" if i > 0 else None
+        if latest_checkpoint and os.path.exists(latest_checkpoint):
+            model.load_state_dict(torch.load(latest_checkpoint))
+
+        mcts = MCTS(Connect4, model, num_simulations=50)
+        examples = run_self_play(mcts, Connect4, num_games=games_per_iteration)
+        dataset = Connect4Dataset(examples)
+        train_model(model, dataset, checkpoint_path="checkpoints")
+
+        checkpoint_file = f"checkpoints/connect4_epoch{i+1}.pt"
+        if os.path.exists(checkpoint_file):
+            evaluate_against_random(checkpoint_file, num_games=20)
 
