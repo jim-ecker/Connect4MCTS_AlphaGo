@@ -51,6 +51,7 @@ def evaluate_against_random(model_path, num_games=20):
             draws += 1
 
     print(f"Eval vs Random ({num_games} games): Wins: {wins}, Losses: {losses}, Draws: {draws}")
+    return {"wins": wins, "losses": losses, "draws": draws, "games": num_games}
 
 
 def evaluate_model_vs_model(model_path_1, model_path_2, num_games=20):
@@ -79,10 +80,5 @@ def evaluate_model_vs_model(model_path_1, model_path_2, num_games=20):
             draws += 1
 
     print(f"Model1 vs Model2 ({num_games} games): Wins: {wins}, Losses: {losses}, Draws: {draws}")
-
-
-if __name__ == "__main__":
-    # Example usage:
-    evaluate_against_random("checkpoints/connect4_epoch5.pt")
-    # evaluate_model_vs_model("checkpoints/connect4_epoch4.pt", "checkpoints/connect4_epoch5.pt")
+    return {"wins": wins, "losses": losses, "draws": draws, "games": num_games}
 

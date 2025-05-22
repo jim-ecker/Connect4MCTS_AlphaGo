@@ -52,17 +52,29 @@ def train_model(model, dataset, batch_size=32, epochs=5, lr=1e-3, checkpoint_pat
             torch.save(model.state_dict(), checkpoint_file)
             print(f"Model checkpoint saved to: {checkpoint_file}")
 
+            if elo > best_elo:
+                best_elo = elo
+                torch.save(model.state_dict(), "checkpoints/best_model.pt")
+                print("New best model saved as best_model.pt")
+            print(f"Model checkpoint saved to: {checkpoint_file}")
+
 if __name__ == "__main__":
     from connect4 import Connect4
     from mcts import MCTS
     from evaluate import evaluate_against_random
 
+    def update_elo(current_elo, expected, actual, k=32):
+        return current_elo + k * (actual - expected)
+
     num_iterations = 5
     games_per_iteration = 10
+    elo = 1000
+    opponent_elo = 1000
+
+    best_elo = elo
 
     for i in range(num_iterations):
-        print(f"
-=== Iteration {i+1}/{num_iterations} ===")
+        print(f"\n=== Iteration {i+1}/{num_iterations} ===")
         model = Connect4Net()
         latest_checkpoint = f"checkpoints/connect4_epoch{i}.pt" if i > 0 else None
         if latest_checkpoint and os.path.exists(latest_checkpoint):
@@ -75,9 +87,13 @@ if __name__ == "__main__":
 
         checkpoint_file = f"checkpoints/connect4_epoch{i+1}.pt"
         if os.path.exists(checkpoint_file):
-            from evaluate import evaluate_against_random
             result = evaluate_against_random(checkpoint_file, num_games=20)
+
+            total_games = result['games']
+            score = result['wins'] + 0.5 * result['draws']
+            expected_score = 1 / (1 + 10 ** ((opponent_elo - elo) / 400))
+            elo = update_elo(elo, expected_score * total_games, score)
+
             with open("win_rates.csv", "a") as f:
-                f.write(f"{i+1},{result['wins']},{result['losses']},{result['draws']}
-")
+                f.write(f"{i+1},{result['wins']},{result['losses']},{result['draws']},{int(elo)}\n")
 
